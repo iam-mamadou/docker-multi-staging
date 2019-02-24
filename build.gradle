@@ -1,6 +1,8 @@
+
 plugins {
 	id 'org.springframework.boot' version '2.1.3.RELEASE'
 	id 'com.palantir.docker' version '0.21.0'
+	id 'application'
 	id 'java'
 }
 
@@ -9,6 +11,8 @@ apply plugin: 'io.spring.dependency-management'
 group = 'com.mamadou.dockermultistaging'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
+mainClassName = 'com.mamadou.dockermultistaging.DockerMultiStagingApplication'
+
 
 repositories {
 	mavenCentral()
@@ -29,7 +33,7 @@ docker {
 	tag "remote", "$registryServerName/$imageName:$imageTag"
 	files bootJar, file("src/main/docker/entrypoint.sh")
 	dockerfile file('src/main/docker/Dockerfile')
-	buildArgs([APP_MAIN_CLASS_NAME: "$bootJar.mainClassName"])
+	buildArgs([APP_MAIN_CLASS_NAME: mainClassName])
 }
 
 tasks.docker.dependsOn(build)
