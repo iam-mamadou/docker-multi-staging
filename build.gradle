@@ -1,0 +1,35 @@
+plugins {
+	id 'org.springframework.boot' version '2.1.3.RELEASE'
+	id 'com.palantir.docker' version '0.21.0'
+	id 'java'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+group = 'com.mamadou.dockermultistaging'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+docker {
+	def registryServerName = project.findProperty('docker-server')
+	def imageName = project.name
+	def imageTag = project.findProperty('image-tag') ?: "latest"
+
+	name imageName
+	tag "remote", "$registryServerName/$imageName:$imageTag"
+	files bootJar, file("src/main/docker/entrypoint.sh")
+	dockerfile file('src/main/docker/Dockerfile')
+	buildArgs([APP_MAIN_CLASS_NAME: "$bootJar.mainClassName"])
+}
+
+tasks.docker.dependsOn(build)
